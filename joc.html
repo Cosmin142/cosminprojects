@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizz</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+        }
+
+        #game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            position: relative;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #character-container {
+            margin-top: 10%;
+            justify-content: space-between;
+            align-items: center; 
+            position: relative;
+            height: 50vh;
+            width: 80vw;
+            margin-bottom: 20px;
+            min-height: 150px; 
+        }
+
+        .character {
+            position: relative;
+            width: 30%;
+            margin: 0 10px;
+        }
+
+        .mario img,
+        .dragon img {
+            width: 100%;
+            height: auto;
+        }
+
+        #fireball {
+            position: absolute;
+            width: 11%; 
+            height: 40%;
+            background-color: orange;
+            border-radius: 50%;
+            display: none;
+            transition: transform 1.5s linear;
+            bottom: 25%;
+        }
+
+        #princess {
+            position: absolute;
+            top: 18%;
+            left: 28%;
+            width: 13%; 
+            display: none;
+            height: auto;
+        }
+
+        #result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem; 
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        #questions {
+            margin: 0; 
+            padding-top: 20px; 
+            width: 100%; 
+        }
+
+        .question {
+            margin-bottom: 15px;
+            text-align: left; 
+        }
+
+        label {
+            display: block; 
+            margin: 5px 0; 
+        }
+
+        #start-game {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .home-page-button {
+            padding: 10px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .replay-button {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: green;
+            border: none;
+            color: white;
+        }
+
+        @media (max-width: 480px) {
+            #character-container {
+                margin-top: 50%;
+                position: relative;
+                height: 50vh;
+                width: 50vh;
+                margin-bottom: 20px;
+                min-height: 150px; 
+            }
+
+            #fireball {
+                position: absolute;
+                width: 12%; 
+                height: 12%;
+                background-color: orange;
+                border-radius: 100%;
+                display: none;
+                transition: transform 1.5s linear;
+                bottom: 10%;
+            }
+
+            #princess {
+                position: absolute;
+                top: 35%;
+                left: 28%;
+                width: 30%; 
+                height: 30%;
+                display: none;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="questions">
+        <h1>Quizz</h1>
+        <div id="question-1" class="question">
+            <p>Care sunt cele trei aspecte importante pe care trebuie să le evaluezi atunci când analizezi un cumpărător?</p>
+            <label><input type="radio" name="answer-1" value="a"> A) Interesul, bugetul și urgența achiziției</label>
+            <label><input type="radio" name="answer-1" value="b"> B) Vârsta, localizarea și experiența</label>
+            <label><input type="radio" name="answer-1" value="c"> C) Tipul produsului, concurența și prețul</label>
+        </div>
+        
+        <div id="question-2" class="question">
+            <p>Ce etapă urmează după prezentarea produsului în procesul de vânzare?</p>
+            <label><input type="radio" name="answer-2" value="a"> A) Finalizarea tranzacției</label>
+            <label><input type="radio" name="answer-2" value="b"> B) Stabilirea prețului</label>
+            <label><input type="radio" name="answer-2" value="c"> C) Discuția despre livrare</label>
+        </div>
+        
+        <div id="question-3" class="question">
+            <p>Care este una dintre tehnicile recomandate pentru a avea succes în negociere?</p>
+            <label><input type="radio" name="answer-3" value="a"> A) Să ignori cerințele cumpărătorului</label>
+            <label><input type="radio" name="answer-3" value="b"> B) Să cunoști bine produsul și prețurile pieței</label>
+            <label><input type="radio" name="answer-3" value="c"> C) Să te bazezi doar pe reduceri de preț</label>
+        </div>
+
+        <button id="start-game">Trimite</button>
+        <button class="home-page-button" onclick="goToHomePage();">Către pagina principală</button>
+    </div>
+
+    <div id="character-container" style="display: none;">
+        <div class="character mario" id="player">
+            <img src="poze/mario.png" alt="Mario">
+        </div>
+
+        <div class="character dragon" id="enemy">
+            <img src="poze/dragon.png" alt="Dragon">
+        </div>
+
+        <div id="fireball"></div>
+    </div>
+
+    <img id="princess" src="poze/printesa.png" alt="Princess">
+
+    <div id="result"></div>
+
+    <button class="replay-button js-replay-button" onclick="goToQuizz();" style="display: none;">Joacă din nou</button>
+    <button class="home-page-button js-home-page-button" onclick="goToHomePage();" style="display: none; margin-top: 5px;">Către pagina principală</button>
+</div>
+
+<script>
+    const correctAnswers = ['a', 'b', 'b']; 
+
+    document.getElementById('start-game').onclick = function() {
+        const playerElement = document.getElementById('player');
+        const enemyElement = document.getElementById('enemy');
+        const resultElement = document.getElementById('result');
+        const fireballElement = document.getElementById('fireball');
+        const princessElement = document.getElementById('princess');
+        const QuestionsElement = document.getElementById('questions'); 
+        const characterContainer = document.getElementById('character-container');
+        const replayButton = document.querySelector('.js-replay-button');
+        const homePageButton = document.querySelector('.js-home-page-button');
+
+        characterContainer.style.display = 'flex';
+        fireballElement.style.display = 'block'; 
+        fireballElement.style.transition = 'none'; 
+        replayButton.style.display = 'block';
+        homePageButton.style.display = 'block';
+
+        const userAnswers = [
+            document.querySelector('input[name="answer-1"]:checked')?.value,
+            document.querySelector('input[name="answer-2"]:checked')?.value,
+            document.querySelector('input[name="answer-3"]:checked')?.value
+        ];
+
+        let playerWins = true;
+
+        for (let i = 0; i < correctAnswers.length; i++) {
+            if (userAnswers[i] !== correctAnswers[i]) {
+                playerWins = false;
+                break;
+            }
+        }
+
+        const fireballStartX = (playerElement.offsetLeft + playerElement.offsetWidth / 2) - (fireballElement.offsetWidth / 2);
+        const fireballEndX = (enemyElement.offsetLeft + enemyElement.offsetWidth / 2) - (fireballElement.offsetWidth / 2);
+
+        if (playerWins) {
+            resultElement.innerHTML = "Felicitări, ai salvat prințesa!";
+            resultElement.style.color = "green";
+
+            fireballElement.style.bottom = '25%'; 
+            fireballElement.style.left = `${fireballStartX}px`;
+
+            setTimeout(function() {
+                fireballElement.style.transition = 'transform 1.5s linear';
+                fireballElement.style.transform = `translateX(${fireballEndX - fireballStartX}px)`;
+            }, 10);
+
+            setTimeout(function() {
+                princessElement.style.display = 'block'; 
+            }, 2500);
+
+            setTimeout(function() {
+                enemyElement.style.opacity = 0; 
+                fireballElement.style.display = 'none'; 
+            }, 1500);
+
+        } else {
+            resultElement.innerHTML = "Mai încearcă!";
+            resultElement.style.color = "red";
+
+            fireballElement.style.bottom = '25%'; 
+            fireballElement.style.left = `${fireballEndX}px`;
+
+            setTimeout(function() {
+                fireballElement.style.transition = 'transform 1.5s linear';
+                fireballElement.style.transform = `translateX(-${fireballEndX - fireballStartX}px)`;
+            }, 10);
+
+            setTimeout(function() {
+                playerElement.style.opacity = 0; 
+                fireballElement.style.display = 'none'; 
+            }, 1500);
+        }
+
+        QuestionsElement.style.display = 'none';
+    };
+
+    function goToQuizz(){
+            window.location.href = 'joc.html';
+        }
+
+    function goToHomePage(){
+            window.location.href = 'pagina-principala.html';
+        } 
+</script>
+
+</body>
+</html>
